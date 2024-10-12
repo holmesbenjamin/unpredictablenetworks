@@ -155,7 +155,7 @@ def update(val):
     fig3.canvas.draw_idle()
     fig4.canvas.draw_idle()
 
-def run_simulation(a, b1, b2, b3, b4, b5, initial_x1, initial_x2, x1bar, x2bar, tau1, tau2, T=1000.0, epsilon=1.0):
+def run_simulation(a, b1, b2, b3, b4, b5, initial_x1, initial_x2, x1bar, x2bar, tau1, tau2, T=5000.0, epsilon=1.0):
     N = int(T / epsilon)
     x1 = np.zeros(N)
     x2 = np.zeros(N)
@@ -316,12 +316,12 @@ ax_tau2 = fig2.add_axes([0.25, 0, 0.65, 0.03], facecolor='lightgoldenrodyellow')
 ax_initial_x1 = fig2.add_axes([0.25, 0.60, 0.65, 0.03], facecolor='lightgoldenrodyellow')
 ax_initial_x2 = fig2.add_axes([0.25, 0.55, 0.65, 0.03], facecolor='lightgoldenrodyellow')
 
-slider_a = Slider(ax_a, 'a', 0.1, 2000.0, valinit=a_init)
-slider_b1 = Slider(ax_b1, 'b1', 0.1, 2000.0, valinit=b1_init)
-slider_b2 = Slider(ax_b2, 'b2', 0.1, 2000.0, valinit=b2_init)
-slider_b3 = Slider(ax_b3, 'b3', 0.1, 2000.0, valinit=b3_init)
-slider_b4 = Slider(ax_b4, 'b4', 0.1, 2000.0, valinit=b4_init)
-slider_b5 = Slider(ax_b5, 'b5', 0.1, 2000.0, valinit=b5_init)
+slider_a = Slider(ax_a, 'a', -2000, 2000.0, valinit=a_init)
+slider_b1 = Slider(ax_b1, 'b1', -2000, 2000.0, valinit=b1_init)
+slider_b2 = Slider(ax_b2, 'b2', -2000, 2000.0, valinit=b2_init)
+slider_b3 = Slider(ax_b3, 'b3', -2000, 2000.0, valinit=b3_init)
+slider_b4 = Slider(ax_b4, 'b4', -2000, 2000.0, valinit=b4_init)
+slider_b5 = Slider(ax_b5, 'b5', -2000, 2000.0, valinit=b5_init)
 slider_x1bar = Slider(ax_x1bar, 'x1bar', 1, 2000, valinit=x1bar_init)
 slider_x2bar = Slider(ax_x2bar, 'x2bar', 1, 2000, valinit=x2bar_init)
 slider_tau1 = Slider(ax_tau1, 'tau1', 0, 50, valinit=tau1_init)
