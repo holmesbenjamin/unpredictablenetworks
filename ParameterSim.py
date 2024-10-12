@@ -85,7 +85,7 @@ def update(val):
     initial_x1 = slider_initial_x1.val
     initial_x2 = slider_initial_x2.val
 
-    x1, x2, z, mode_array, zdot_av, norm_mu00_array, norm_mu01_array, norm_mu10_array, norm_mu11_array = run_simulation(
+    x1, x2, z, zdot_array, mode_array, zdot_av, norm_mu00_array, norm_mu01_array, norm_mu10_array, norm_mu11_array = run_simulation(
         a, b1, b2, b3, b4, b5, initial_x1, initial_x2, x1bar, x2bar, int(tau1), int(tau2)
     )
 
@@ -135,12 +135,25 @@ def update(val):
     ax_mu00.set_xlabel('Time Steps')
     ax_mu00.set_ylabel('Normalized mu00')
 
+    ax_z.cla()
+    ax_z.plot(timestep_array, z, label='z over time')
+    ax_z.set_title('z over Time')
+    ax_z.set_xlabel('Time Steps')
+    ax_z.set_ylabel('z')
+
+    ax_zdot.cla()
+    ax_zdot.plot(timestep_array, zdot_array, label='zdot over time')
+    ax_zdot.set_title('zdot over Time')
+    ax_zdot.set_xlabel('Time Steps')
+    ax_zdot.set_ylabel('zdot')
+
     zdot_av_text.set_text(f'zdot_av11 = {zdot_av:.2f}')
 
     draggable_plot.connect()
 
     fig1.canvas.draw_idle()
     fig3.canvas.draw_idle()
+    fig4.canvas.draw_idle()
 
 def run_simulation(a, b1, b2, b3, b4, b5, initial_x1, initial_x2, x1bar, x2bar, tau1, tau2, T=1000.0, epsilon=1.0):
     N = int(T / epsilon)
@@ -151,11 +164,13 @@ def run_simulation(a, b1, b2, b3, b4, b5, initial_x1, initial_x2, x1bar, x2bar, 
     norm_mu10_array = np.zeros(N)
     norm_mu11_array = np.zeros(N)
     z = np.zeros(N)
+    zdot_array = np.zeros(N)
     mode_array = np.zeros(N, dtype=int)  
 
     x1[0] = initial_x1
     x2[0] = initial_x2
     z[0] = 0
+    zdot_array[0] = 0
 
     delay_buffer_size1 = max(tau1 + 1, 1)
     delay_buffer_size2 = max(tau2 + 1, 1)
@@ -176,7 +191,7 @@ def run_simulation(a, b1, b2, b3, b4, b5, initial_x1, initial_x2, x1bar, x2bar, 
         H1_delayed = 1.0 if delay_buffer1[idx_delay1] - x1bar >= 0 else 0.0
         H2_delayed = 1.0 if delay_buffer2[idx_delay2] - x2bar >= 0 else 0.0
 
-        x1_dot = a - b1 * H1_delayed - -b2 * H2_delayed - b3 * H1_delayed * H2_delayed
+        x1_dot = a - b1 * H1_delayed - b2 * H2_delayed - b3 * H1_delayed * H2_delayed
         x2_dot = a - b4 * H2_delayed
 
         x1[n] = x1[n - 1] + epsilon * x1_dot
@@ -187,6 +202,7 @@ def run_simulation(a, b1, b2, b3, b4, b5, initial_x1, initial_x2, x1bar, x2bar, 
 
         z_dot = -2 * a + (b5 * H1_delayed * H2_delayed)
         z[n] = z[n - 1] + epsilon * z_dot
+        zdot_array[n] = z_dot
 
         if H1_delayed == 0.0 and H2_delayed == 0.0:
             time_mu00 += epsilon
@@ -214,11 +230,12 @@ def run_simulation(a, b1, b2, b3, b4, b5, initial_x1, initial_x2, x1bar, x2bar, 
             norm_mu11_array[n] = 0
 
     zdot_av = -2 * a + (b5 * norm_mu11_array[-1])
-    return x1, x2, z, mode_array, zdot_av, norm_mu00_array, norm_mu01_array, norm_mu10_array, norm_mu11_array
+    return x1, x2, z, zdot_array, mode_array, zdot_av, norm_mu00_array, norm_mu01_array, norm_mu10_array, norm_mu11_array
 
 fig1, (ax_phase, ax_hist) = plt.subplots(2, 1, figsize=(10, 8))  
 fig2 = plt.figure(figsize=(8, 6))  
 fig3, ((ax_mu11, ax_mu10), (ax_mu01, ax_mu00)) = plt.subplots(2, 2, figsize=(12, 10)) 
+fig4, (ax_z, ax_zdot) = plt.subplots(2, 1, figsize=(10, 8))
 fig2.subplots_adjust(left=0.3, right=0.95)  
 
 zdot_av_text = fig1.text(0.1, 0.9, '', transform=fig1.transFigure, fontsize=12)
@@ -236,7 +253,7 @@ x2bar_init = 1
 tau1_init = 0
 tau2_init = 0
 
-x1, x2, z, mode_array, zdot_av, norm_mu00_array, norm_mu01_array, norm_mu10_array, norm_mu11_array = run_simulation(
+x1, x2, z, zdot_array, mode_array, zdot_av, norm_mu00_array, norm_mu01_array, norm_mu10_array, norm_mu11_array = run_simulation(
     a_init, b1_init, b2_init, b3_init, b4_init, b5_init, initial_x1, initial_x2, x1bar_init, x2bar_init, tau1_init, tau2_init
 )
 
@@ -275,6 +292,16 @@ ax_hist.set_xticklabels(['mu00', 'mu01', 'mu10', 'mu11'])
 ax_hist.set_title('State Histogram')
 ax_hist.set_xlabel('Modes')
 ax_hist.set_ylabel('Frequency')
+
+ax_z.plot(timestep_array, z, label='z over time')
+ax_z.set_title('z over Time')
+ax_z.set_xlabel('Time Steps')
+ax_z.set_ylabel('z')
+
+ax_zdot.plot(timestep_array, zdot_array, label='zdot over time')
+ax_zdot.set_title('zdot over Time')
+ax_zdot.set_xlabel('Time Steps')
+ax_zdot.set_ylabel('zdot')
 
 ax_a = fig2.add_axes([0.25, 0.45, 0.65, 0.03], facecolor='lightgoldenrodyellow')
 ax_b1 = fig2.add_axes([0.25, 0.40, 0.65, 0.03], facecolor='lightgoldenrodyellow')
