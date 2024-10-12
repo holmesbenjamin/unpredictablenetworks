@@ -67,7 +67,6 @@ def zoom_factory(ax, base_scale=2.):
     ax.figure.canvas.mpl_connect('scroll_event', zoom_fun)
 
 def update(val):
-    # Disconnect the draggable plot event handlers
     draggable_plot.disconnect()
 
     xlim = ax_phase.get_xlim()
@@ -85,7 +84,7 @@ def update(val):
     initial_x1 = slider_initial_x1.val
     initial_x2 = slider_initial_x2.val
 
-    x1, x2, z, mode_array, zdot_av, norm_mu11_array = run_simulation(
+    x1, x2, z, mode_array, zdot_av, norm_mu00_array, norm_mu01_array, norm_mu10_array, norm_mu11_array = run_simulation(
         b, c, d, e, f, initial_x1, initial_x2, x1bar, x2bar, int(tau1), int(tau2)
     )
 
@@ -110,15 +109,33 @@ def update(val):
 
     n = len(norm_mu11_array)  
     timestep_array = np.arange(1, n + 1)
+
     ax_mu11.cla()
-    ax_mu11.plot(timestep_array, norm_mu11_array, label='Av time in mu11 over time steps')
-    ax_mu11.set_title('Mu11 Normalized over Time')
+    ax_mu11.plot(timestep_array, norm_mu11_array, label='mu11')
+    ax_mu11.set_title('mu11 Normalized over Time')
     ax_mu11.set_xlabel('Time Steps')
-    ax_mu11.set_ylabel('Normalized Mu11')
+    ax_mu11.set_ylabel('Normalized mu11')
+
+    ax_mu10.cla()
+    ax_mu10.plot(timestep_array, norm_mu10_array, label='mu10', color='orange')
+    ax_mu10.set_title('mu10 Normalized over Time')
+    ax_mu10.set_xlabel('Time Steps')
+    ax_mu10.set_ylabel('Normalized mu10')
+
+    ax_mu01.cla()
+    ax_mu01.plot(timestep_array, norm_mu01_array, label='mu01', color='green')
+    ax_mu01.set_title('mu01 Normalized over Time')
+    ax_mu01.set_xlabel('Time Steps')
+    ax_mu01.set_ylabel('Normalized mu01')
+
+    ax_mu00.cla()
+    ax_mu00.plot(timestep_array, norm_mu00_array, label='mu00', color='red')
+    ax_mu00.set_title('mu00 Normalized over Time')
+    ax_mu00.set_xlabel('Time Steps')
+    ax_mu00.set_ylabel('Normalized mu00')
 
     zdot_av_text.set_text(f'zdot_av11 = {zdot_av:.2f}')
 
-    # Reconnect the draggable plot event handlers
     draggable_plot.connect()
 
     fig1.canvas.draw_idle()
@@ -128,6 +145,9 @@ def run_simulation(b, c, d, e, f, initial_x1, initial_x2, x1bar, x2bar, tau1, ta
     N = int(T / epsilon)
     x1 = np.zeros(N)
     x2 = np.zeros(N)
+    norm_mu00_array = np.zeros(N)
+    norm_mu01_array = np.zeros(N)
+    norm_mu10_array = np.zeros(N)
     norm_mu11_array = np.zeros(N)
     z = np.zeros(N)
     mode_array = np.zeros(N, dtype=int)  
@@ -181,18 +201,25 @@ def run_simulation(b, c, d, e, f, initial_x1, initial_x2, x1bar, x2bar, tau1, ta
             mode_array[n] = 3
 
         total_time = time_mu00 + time_mu01 + time_mu10 + time_mu11
-        norm_mu11_array[n] = time_mu11 / total_time if total_time > 0 else 0
+        if total_time > 0:
+            norm_mu00_array[n] = time_mu00 / total_time
+            norm_mu01_array[n] = time_mu01 / total_time
+            norm_mu10_array[n] = time_mu10 / total_time
+            norm_mu11_array[n] = time_mu11 / total_time
+        else:
+            norm_mu00_array[n] = 0
+            norm_mu01_array[n] = 0
+            norm_mu10_array[n] = 0
+            norm_mu11_array[n] = 0
 
     zdot_av = -2 * c + f * norm_mu11_array[-1]
-    return x1, x2, z, mode_array, zdot_av, norm_mu11_array
+    return x1, x2, z, mode_array, zdot_av, norm_mu00_array, norm_mu01_array, norm_mu10_array, norm_mu11_array
 
-# Initialize figures and axes
 fig1, (ax_phase, ax_hist) = plt.subplots(2, 1, figsize=(10, 8))  
 fig2 = plt.figure(figsize=(8, 6))  
-fig3, ax_mu11 = plt.subplots(1, 1, figsize=(10, 8)) 
+fig3, ((ax_mu11, ax_mu10), (ax_mu01, ax_mu00)) = plt.subplots(2, 2, figsize=(12, 10)) 
 fig2.subplots_adjust(left=0.3, right=0.95)  
 
-# Initialize text for zdot_av
 zdot_av_text = fig1.text(0.1, 0.9, '', transform=fig1.transFigure, fontsize=12)
 
 b_init = 1
@@ -207,7 +234,7 @@ x2bar_init = 1
 tau1_init = 0
 tau2_init = 0
 
-x1, x2, z, mode_array, zdot_av, norm_mu11_array = run_simulation(
+x1, x2, z, mode_array, zdot_av, norm_mu00_array, norm_mu01_array, norm_mu10_array, norm_mu11_array = run_simulation(
     b_init, c_init, d_init, e_init, f_init, initial_x1, initial_x2, x1bar_init, x2bar_init, tau1_init, tau2_init
 )
 
@@ -219,10 +246,26 @@ ax_phase.grid(True)
 
 n = len(norm_mu11_array)  
 timestep_array = np.arange(1, n + 1)
-ax_mu11.plot(timestep_array, norm_mu11_array, label='Av time in mu11 over time steps')
-ax_mu11.set_title('Mu11 Normalized over Time')
+
+ax_mu11.plot(timestep_array, norm_mu11_array, label='mu11')
+ax_mu11.set_title('mu11 Normalized over Time')
 ax_mu11.set_xlabel('Time Steps')
-ax_mu11.set_ylabel('Normalized Mu11')
+ax_mu11.set_ylabel('Normalized mu11')
+
+ax_mu10.plot(timestep_array, norm_mu10_array, label='mu10', color='orange')
+ax_mu10.set_title('mu10 Normalized over Time')
+ax_mu10.set_xlabel('Time Steps')
+ax_mu10.set_ylabel('Normalized mu10')
+
+ax_mu01.plot(timestep_array, norm_mu01_array, label='mu01', color='green')
+ax_mu01.set_title('mu01 Normalized over Time')
+ax_mu01.set_xlabel('Time Steps')
+ax_mu01.set_ylabel('Normalized mu01')
+
+ax_mu00.plot(timestep_array, norm_mu00_array, label='mu00', color='red')
+ax_mu00.set_title('mu00 Normalized over Time')
+ax_mu00.set_xlabel('Time Steps')
+ax_mu00.set_ylabel('Normalized mu00')
 
 ax_hist.hist(mode_array, bins=[-0.5, 0.5, 1.5, 2.5, 3.5], rwidth=0.8, align='mid')
 ax_hist.set_xticks([0, 1, 2, 3])
@@ -231,7 +274,6 @@ ax_hist.set_title('State Histogram')
 ax_hist.set_xlabel('Modes')
 ax_hist.set_ylabel('Frequency')
 
-# Create slider axes in fig2 using fig2.add_axes()
 ax_b = fig2.add_axes([0.25, 0.45, 0.65, 0.03], facecolor='lightgoldenrodyellow')
 ax_c = fig2.add_axes([0.25, 0.40, 0.65, 0.03], facecolor='lightgoldenrodyellow')
 ax_d = fig2.add_axes([0.25, 0.35, 0.65, 0.03], facecolor='lightgoldenrodyellow')
@@ -244,7 +286,6 @@ ax_tau2 = fig2.add_axes([0.25, 0.05, 0.65, 0.03], facecolor='lightgoldenrodyello
 ax_initial_x1 = fig2.add_axes([0.25, 0.60, 0.65, 0.03], facecolor='lightgoldenrodyellow')
 ax_initial_x2 = fig2.add_axes([0.25, 0.55, 0.65, 0.03], facecolor='lightgoldenrodyellow')
 
-# Create sliders
 slider_b = Slider(ax_b, 'b', 0.1, 2000.0, valinit=b_init)
 slider_c = Slider(ax_c, 'c', 0.1, 2000.0, valinit=c_init)
 slider_d = Slider(ax_d, 'd', 0.1, 2000.0, valinit=d_init)
@@ -257,7 +298,6 @@ slider_tau2 = Slider(ax_tau2, 'tau2', 0, 50, valinit=tau2_init)
 slider_initial_x1 = Slider(ax_initial_x1, 'initial x1', 1, 2000, valinit=initial_x1)
 slider_initial_x2 = Slider(ax_initial_x2, 'initial x2', 1, 2000, valinit=initial_x2)
 
-# Connect sliders to update function
 slider_b.on_changed(update)
 slider_c.on_changed(update)
 slider_d.on_changed(update)
