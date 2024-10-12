@@ -108,21 +108,21 @@ def update(val):
     ax_hist.set_xlabel('Modes')
     ax_hist.set_ylabel('Frequency')
 
-    # n = len(norm_mu11_array)  
-    # timestep_array = np.arange(1, n + 1)
-    # ax_mu11.cla()
-    # ax_mu11.plot(timestep_array, norm_mu11_array, label='Av time in mu11 over time steps')
-    # ax_mu11.set_title('Mu11 Normalized over Time')
-    # ax_mu11.set_xlabel('Time Steps')
-    # ax_mu11.set_ylabel('Normalized Mu11')
+    n = len(norm_mu11_array)  
+    timestep_array = np.arange(1, n + 1)
+    ax_mu11.cla()
+    ax_mu11.plot(timestep_array, norm_mu11_array, label='Av time in mu11 over time steps')
+    ax_mu11.set_title('Mu11 Normalized over Time')
+    ax_mu11.set_xlabel('Time Steps')
+    ax_mu11.set_ylabel('Normalized Mu11')
 
-    #zdot_av_text.set_text(f'zdot_av11 = {zdot_av:.2f}')
+    zdot_av_text.set_text(f'zdot_av11 = {zdot_av:.2f}')
 
     # Reconnect the draggable plot event handlers
     draggable_plot.connect()
 
     fig1.canvas.draw_idle()
-    #fig3.canvas.draw_idle()
+    fig3.canvas.draw_idle()
 
 def run_simulation(b, c, d, e, f, initial_x1, initial_x2, x1bar, x2bar, tau1, tau2, T=1000.0, epsilon=1.0):
     N = int(T / epsilon)
@@ -189,10 +189,11 @@ def run_simulation(b, c, d, e, f, initial_x1, initial_x2, x1bar, x2bar, tau1, ta
 # Initialize figures and axes
 fig1, (ax_phase, ax_hist) = plt.subplots(2, 1, figsize=(10, 8))  
 fig2 = plt.figure(figsize=(8, 6))  
-#fig3, ax_mu11 = plt.subplots(1, 1, figsize=(10, 8)) 
+fig3, ax_mu11 = plt.subplots(1, 1, figsize=(10, 8)) 
 fig2.subplots_adjust(left=0.3, right=0.95)  
 
-#zdot_av_text = fig1.text(0.1, 0.9, '', transform=fig1.transFigure, fontsize=12)
+# Initialize text for zdot_av
+zdot_av_text = fig1.text(0.1, 0.9, '', transform=fig1.transFigure, fontsize=12)
 
 b_init = 1
 c_init = 1
@@ -216,12 +217,12 @@ ax_phase.set_ylabel('x2')
 ax_phase.set_title('Phase Space Trajectory (x1 vs x2)')
 ax_phase.grid(True)
 
-# n = len(norm_mu11_array)  
-# timestep_array = np.arange(1, n + 1)
-# ax_mu11.plot(timestep_array, norm_mu11_array, label='Av time in mu11 over time steps')
-# ax_mu11.set_title('Mu11 Normalized over Time')
-# ax_mu11.set_xlabel('Time Steps')
-# ax_mu11.set_ylabel('Normalized Mu11')
+n = len(norm_mu11_array)  
+timestep_array = np.arange(1, n + 1)
+ax_mu11.plot(timestep_array, norm_mu11_array, label='Av time in mu11 over time steps')
+ax_mu11.set_title('Mu11 Normalized over Time')
+ax_mu11.set_xlabel('Time Steps')
+ax_mu11.set_ylabel('Normalized Mu11')
 
 ax_hist.hist(mode_array, bins=[-0.5, 0.5, 1.5, 2.5, 3.5], rwidth=0.8, align='mid')
 ax_hist.set_xticks([0, 1, 2, 3])
@@ -230,18 +231,18 @@ ax_hist.set_title('State Histogram')
 ax_hist.set_xlabel('Modes')
 ax_hist.set_ylabel('Frequency')
 
-# Create slider axes in fig2
-ax_b = plt.axes([0.25, 0.45, 0.65, 0.03], facecolor='lightgoldenrodyellow', figure=fig2)
-ax_c = plt.axes([0.25, 0.40, 0.65, 0.03], facecolor='lightgoldenrodyellow', figure=fig2)
-ax_d = plt.axes([0.25, 0.35, 0.65, 0.03], facecolor='lightgoldenrodyellow', figure=fig2)
-ax_e = plt.axes([0.25, 0.30, 0.65, 0.03], facecolor='lightgoldenrodyellow', figure=fig2)
-ax_f = plt.axes([0.25, 0.25, 0.65, 0.03], facecolor='lightgoldenrodyellow', figure=fig2)
-ax_x1bar = plt.axes([0.25, 0.20, 0.65, 0.03], facecolor='lightgoldenrodyellow', figure=fig2)
-ax_x2bar = plt.axes([0.25, 0.15, 0.65, 0.03], facecolor='lightgoldenrodyellow', figure=fig2)
-ax_tau1 = plt.axes([0.25, 0.10, 0.65, 0.03], facecolor='lightgoldenrodyellow', figure=fig2)
-ax_tau2 = plt.axes([0.25, 0.05, 0.65, 0.03], facecolor='lightgoldenrodyellow', figure=fig2)
-ax_initial_x1 = plt.axes([0.25, 0.60, 0.65, 0.03], facecolor='lightgoldenrodyellow', figure=fig2)
-ax_initial_x2 = plt.axes([0.25, 0.55, 0.65, 0.03], facecolor='lightgoldenrodyellow', figure=fig2)
+# Create slider axes in fig2 using fig2.add_axes()
+ax_b = fig2.add_axes([0.25, 0.45, 0.65, 0.03], facecolor='lightgoldenrodyellow')
+ax_c = fig2.add_axes([0.25, 0.40, 0.65, 0.03], facecolor='lightgoldenrodyellow')
+ax_d = fig2.add_axes([0.25, 0.35, 0.65, 0.03], facecolor='lightgoldenrodyellow')
+ax_e = fig2.add_axes([0.25, 0.30, 0.65, 0.03], facecolor='lightgoldenrodyellow')
+ax_f = fig2.add_axes([0.25, 0.25, 0.65, 0.03], facecolor='lightgoldenrodyellow')
+ax_x1bar = fig2.add_axes([0.25, 0.20, 0.65, 0.03], facecolor='lightgoldenrodyellow')
+ax_x2bar = fig2.add_axes([0.25, 0.15, 0.65, 0.03], facecolor='lightgoldenrodyellow')
+ax_tau1 = fig2.add_axes([0.25, 0.10, 0.65, 0.03], facecolor='lightgoldenrodyellow')
+ax_tau2 = fig2.add_axes([0.25, 0.05, 0.65, 0.03], facecolor='lightgoldenrodyellow')
+ax_initial_x1 = fig2.add_axes([0.25, 0.60, 0.65, 0.03], facecolor='lightgoldenrodyellow')
+ax_initial_x2 = fig2.add_axes([0.25, 0.55, 0.65, 0.03], facecolor='lightgoldenrodyellow')
 
 # Create sliders
 slider_b = Slider(ax_b, 'b', 0.1, 2000.0, valinit=b_init)
