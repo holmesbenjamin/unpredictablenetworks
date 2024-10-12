@@ -72,11 +72,12 @@ def update(val):
     xlim = ax_phase.get_xlim()
     ylim = ax_phase.get_ylim()
 
-    b = slider_b.val
-    c = slider_c.val
-    d = slider_d.val
-    e = slider_e.val
-    f = slider_f.val
+    a = slider_a.val
+    b1 = slider_b1.val
+    b2 = slider_b2.val
+    b3 = slider_b3.val
+    b4 = slider_b4.val
+    b5 = slider_b5.val
     x1bar = slider_x1bar.val
     x2bar = slider_x2bar.val
     tau1 = slider_tau1.val
@@ -85,7 +86,7 @@ def update(val):
     initial_x2 = slider_initial_x2.val
 
     x1, x2, z, mode_array, zdot_av, norm_mu00_array, norm_mu01_array, norm_mu10_array, norm_mu11_array = run_simulation(
-        b, c, d, e, f, initial_x1, initial_x2, x1bar, x2bar, int(tau1), int(tau2)
+        a, b1, b2, b3, b4, b5, initial_x1, initial_x2, x1bar, x2bar, int(tau1), int(tau2)
     )
 
     ax_phase.cla()
@@ -141,7 +142,7 @@ def update(val):
     fig1.canvas.draw_idle()
     fig3.canvas.draw_idle()
 
-def run_simulation(b, c, d, e, f, initial_x1, initial_x2, x1bar, x2bar, tau1, tau2, T=1000.0, epsilon=1.0):
+def run_simulation(a, b1, b2, b3, b4, b5, initial_x1, initial_x2, x1bar, x2bar, tau1, tau2, T=1000.0, epsilon=1.0):
     N = int(T / epsilon)
     x1 = np.zeros(N)
     x2 = np.zeros(N)
@@ -175,8 +176,8 @@ def run_simulation(b, c, d, e, f, initial_x1, initial_x2, x1bar, x2bar, tau1, ta
         H1_delayed = 1.0 if delay_buffer1[idx_delay1] - x1bar >= 0 else 0.0
         H2_delayed = 1.0 if delay_buffer2[idx_delay2] - x2bar >= 0 else 0.0
 
-        x1_dot = c - b * H1_delayed - e * H1_delayed * H2_delayed
-        x2_dot = c - d * H2_delayed
+        x1_dot = a - b1 * H1_delayed - -b2 * H2_delayed - b3 * H1_delayed * H2_delayed
+        x2_dot = a - b4 * H2_delayed
 
         x1[n] = x1[n - 1] + epsilon * x1_dot
         x2[n] = x2[n - 1] + epsilon * x2_dot
@@ -184,7 +185,7 @@ def run_simulation(b, c, d, e, f, initial_x1, initial_x2, x1bar, x2bar, tau1, ta
         delay_buffer1[n % delay_buffer_size1] = x1[n]
         delay_buffer2[n % delay_buffer_size2] = x2[n]
 
-        z_dot = -2 * c + (f * H1_delayed * H2_delayed)
+        z_dot = -2 * a + (b5 * H1_delayed * H2_delayed)
         z[n] = z[n - 1] + epsilon * z_dot
 
         if H1_delayed == 0.0 and H2_delayed == 0.0:
@@ -212,7 +213,7 @@ def run_simulation(b, c, d, e, f, initial_x1, initial_x2, x1bar, x2bar, tau1, ta
             norm_mu10_array[n] = 0
             norm_mu11_array[n] = 0
 
-    zdot_av = -2 * c + f * norm_mu11_array[-1]
+    zdot_av = -2 * a + (b5 * norm_mu11_array[-1])
     return x1, x2, z, mode_array, zdot_av, norm_mu00_array, norm_mu01_array, norm_mu10_array, norm_mu11_array
 
 fig1, (ax_phase, ax_hist) = plt.subplots(2, 1, figsize=(10, 8))  
@@ -222,11 +223,12 @@ fig2.subplots_adjust(left=0.3, right=0.95)
 
 zdot_av_text = fig1.text(0.1, 0.9, '', transform=fig1.transFigure, fontsize=12)
 
-b_init = 1
-c_init = 1
-d_init = 1
-e_init = 1
-f_init = 1
+a_init = 1
+b1_init = 1
+b2_init = 1
+b3_init = 1
+b4_init = 1
+b5_init = 1
 initial_x1 = 1
 initial_x2 = 1
 x1bar_init = 1
@@ -235,7 +237,7 @@ tau1_init = 0
 tau2_init = 0
 
 x1, x2, z, mode_array, zdot_av, norm_mu00_array, norm_mu01_array, norm_mu10_array, norm_mu11_array = run_simulation(
-    b_init, c_init, d_init, e_init, f_init, initial_x1, initial_x2, x1bar_init, x2bar_init, tau1_init, tau2_init
+    a_init, b1_init, b2_init, b3_init, b4_init, b5_init, initial_x1, initial_x2, x1bar_init, x2bar_init, tau1_init, tau2_init
 )
 
 ax_phase.scatter(x1, x2, s=10, label='Phase Space x1 vs x2')
@@ -274,23 +276,25 @@ ax_hist.set_title('State Histogram')
 ax_hist.set_xlabel('Modes')
 ax_hist.set_ylabel('Frequency')
 
-ax_b = fig2.add_axes([0.25, 0.45, 0.65, 0.03], facecolor='lightgoldenrodyellow')
-ax_c = fig2.add_axes([0.25, 0.40, 0.65, 0.03], facecolor='lightgoldenrodyellow')
-ax_d = fig2.add_axes([0.25, 0.35, 0.65, 0.03], facecolor='lightgoldenrodyellow')
-ax_e = fig2.add_axes([0.25, 0.30, 0.65, 0.03], facecolor='lightgoldenrodyellow')
-ax_f = fig2.add_axes([0.25, 0.25, 0.65, 0.03], facecolor='lightgoldenrodyellow')
-ax_x1bar = fig2.add_axes([0.25, 0.20, 0.65, 0.03], facecolor='lightgoldenrodyellow')
-ax_x2bar = fig2.add_axes([0.25, 0.15, 0.65, 0.03], facecolor='lightgoldenrodyellow')
-ax_tau1 = fig2.add_axes([0.25, 0.10, 0.65, 0.03], facecolor='lightgoldenrodyellow')
-ax_tau2 = fig2.add_axes([0.25, 0.05, 0.65, 0.03], facecolor='lightgoldenrodyellow')
+ax_a = fig2.add_axes([0.25, 0.45, 0.65, 0.03], facecolor='lightgoldenrodyellow')
+ax_b1 = fig2.add_axes([0.25, 0.40, 0.65, 0.03], facecolor='lightgoldenrodyellow')
+ax_b2 = fig2.add_axes([0.25, 0.35, 0.65, 0.03], facecolor='lightgoldenrodyellow')
+ax_b3 = fig2.add_axes([0.25, 0.30, 0.65, 0.03], facecolor='lightgoldenrodyellow')
+ax_b4 = fig2.add_axes([0.25, 0.25, 0.65, 0.03], facecolor='lightgoldenrodyellow')
+ax_b5 = fig2.add_axes([0.25, 0.20, 0.65, 0.03], facecolor='lightgoldenrodyellow')
+ax_x1bar = fig2.add_axes([0.25, 0.15, 0.65, 0.03], facecolor='lightgoldenrodyellow')
+ax_x2bar = fig2.add_axes([0.25, 0.10, 0.65, 0.03], facecolor='lightgoldenrodyellow')
+ax_tau1 = fig2.add_axes([0.25, 0.05, 0.65, 0.03], facecolor='lightgoldenrodyellow')
+ax_tau2 = fig2.add_axes([0.25, 0, 0.65, 0.03], facecolor='lightgoldenrodyellow')
 ax_initial_x1 = fig2.add_axes([0.25, 0.60, 0.65, 0.03], facecolor='lightgoldenrodyellow')
 ax_initial_x2 = fig2.add_axes([0.25, 0.55, 0.65, 0.03], facecolor='lightgoldenrodyellow')
 
-slider_b = Slider(ax_b, 'b', 0.1, 2000.0, valinit=b_init)
-slider_c = Slider(ax_c, 'c', 0.1, 2000.0, valinit=c_init)
-slider_d = Slider(ax_d, 'd', 0.1, 2000.0, valinit=d_init)
-slider_e = Slider(ax_e, 'e', 0.1, 2000.0, valinit=e_init)
-slider_f = Slider(ax_f, 'f', 0.1, 2000.0, valinit=f_init)
+slider_a = Slider(ax_a, 'a', 0.1, 2000.0, valinit=a_init)
+slider_b1 = Slider(ax_b1, 'b1', 0.1, 2000.0, valinit=b1_init)
+slider_b2 = Slider(ax_b2, 'b2', 0.1, 2000.0, valinit=b2_init)
+slider_b3 = Slider(ax_b3, 'b3', 0.1, 2000.0, valinit=b3_init)
+slider_b4 = Slider(ax_b4, 'b4', 0.1, 2000.0, valinit=b4_init)
+slider_b5 = Slider(ax_b5, 'b5', 0.1, 2000.0, valinit=b5_init)
 slider_x1bar = Slider(ax_x1bar, 'x1bar', 1, 2000, valinit=x1bar_init)
 slider_x2bar = Slider(ax_x2bar, 'x2bar', 1, 2000, valinit=x2bar_init)
 slider_tau1 = Slider(ax_tau1, 'tau1', 0, 50, valinit=tau1_init)
@@ -298,11 +302,12 @@ slider_tau2 = Slider(ax_tau2, 'tau2', 0, 50, valinit=tau2_init)
 slider_initial_x1 = Slider(ax_initial_x1, 'initial x1', 1, 2000, valinit=initial_x1)
 slider_initial_x2 = Slider(ax_initial_x2, 'initial x2', 1, 2000, valinit=initial_x2)
 
-slider_b.on_changed(update)
-slider_c.on_changed(update)
-slider_d.on_changed(update)
-slider_e.on_changed(update)
-slider_f.on_changed(update)
+slider_a.on_changed(update)
+slider_b1.on_changed(update)
+slider_b2.on_changed(update)
+slider_b3.on_changed(update)
+slider_b4.on_changed(update)
+slider_b5.on_changed(update)
 slider_x1bar.on_changed(update)
 slider_x2bar.on_changed(update)
 slider_tau1.on_changed(update)
