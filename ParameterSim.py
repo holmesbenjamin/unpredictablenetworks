@@ -155,7 +155,7 @@ def update(val):
     fig3.canvas.draw_idle()
     fig4.canvas.draw_idle()
 
-def run_simulation(a, b1, b2, b3, b4, b5, initial_x1, initial_x2, x1bar, x2bar, tau1, tau2, T=5000.0, epsilon=1.0):
+def run_simulation(a, b1, b2, b3, b4, b5, initial_x1, initial_x2, x1bar, x2bar, tau1, tau2, T=1000.0, epsilon=1.0):
     N = int(T / epsilon)
     x1 = np.zeros(N)
     x2 = np.zeros(N)
