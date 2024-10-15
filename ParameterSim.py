@@ -90,8 +90,8 @@ def update(val):
     )
 
     ax_phase.cla()
-    ax_phase.scatter(x1, x2, s=0.1, label='Phase Space x1 vs x2')
-
+    ax_phase.scatter(x1[:tPoints], x2[:tPoints], s=0.1, label='Phase Space x1 vs x2', color='red')
+    ax_phase.scatter(x1[tPoints:], x2[tPoints:], s=0.1, label='Phase Space x1 vs x2', color='blue')
     ax_phase.set_xlim(xlim)
     ax_phase.set_ylim(ylim)
 
@@ -256,8 +256,9 @@ tau2_init = 0
 x1, x2, z, zdot_array, mode_array, zdot_av, norm_mu00_array, norm_mu01_array, norm_mu10_array, norm_mu11_array = run_simulation(
     a_init, b1_init, b2_init, b3_init, b4_init, b5_init, initial_x1, initial_x2, x1bar_init, x2bar_init, tau1_init, tau2_init
 )
-
-ax_phase.scatter(x1, x2, s=10, label='Phase Space x1 vs x2')
+tPoints = 200
+ax_phase.scatter(x1[:tPoints], x2[:tPoints], s=0.1, label='Phase Space x1 vs x2', color='red')
+ax_phase.scatter(x1[tPoints:], x2[tPoints:], s=0.1, label='Phase Space x1 vs x2', color='blue')
 ax_phase.set_xlabel('x1')
 ax_phase.set_ylabel('x2')
 ax_phase.set_title('Phase Space Trajectory (x1 vs x2)')
