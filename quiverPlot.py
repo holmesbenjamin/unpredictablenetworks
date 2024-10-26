@@ -49,8 +49,8 @@ def zoom_factory(ax, base_scale=2.):
             return
         cur_xlim = ax.get_xlim()
         cur_ylim = ax.get_ylim()
-        xdata = event.xdata
-        ydata = event.ydata
+        xdata = event.xdata 
+        ydata = event.ydata   
 
         if event.button == 'up':
             scale_factor = 1 / base_scale
@@ -78,7 +78,7 @@ def update(val):
     ylim = ax_phase.get_ylim()
 
     a = slider_a.val
-    delta = 0.01
+    delta = 0.01  
 
     slider_b1.valmin = a + delta
     if slider_b1.val < slider_b1.valmin:
@@ -118,29 +118,41 @@ def update(val):
 
     ax_phase.cla()
 
-    N = len(x1)
-    time_steps = np.arange(N)
+    dx = x1[1:] - x1[:-1]
+    dy = x2[1:] - x2[:-1]
+    skip = 10  
 
-    norm = plt.Normalize(vmin=0, vmax=N-1)
+    arrow_indices = np.arange(0, len(x1) - 1, skip)
 
-    scatter = ax_phase.scatter(x1, x2, c=time_steps, cmap='viridis', s=0.1, norm=norm)
+    norm = plt.Normalize(0, len(x1) - 1)
+    normalized_time = norm(arrow_indices)
+
+    colors = cmap(normalized_time)
+
+    quiver = ax_phase.quiver(
+        x1[:-1][arrow_indices], x2[:-1][arrow_indices],
+        dx[arrow_indices], dy[arrow_indices],
+        scale_units='xy', angles='xy', scale=1, width=0.002,
+        color=colors
+    )
 
     ax_phase.set_xlim(xlim)
     ax_phase.set_ylim(ylim)
 
     ax_phase.set_xlabel('x1')
     ax_phase.set_ylabel('x2')
-    ax_phase.set_title('Phase Space Trajectory (x1 vs x2)')
+    ax_phase.set_title('Phase Space Trajectory with Direction')
     ax_phase.grid(True)
 
-    if cbar_phase is not None:
-        cbar_phase.remove()
-
-    cbar_phase = fig1.colorbar(scatter, ax=ax_phase)
-    cbar_phase.set_label('Time Step')
+    sm.set_norm(norm)
+    sm.set_array([])
+    cbar_phase.update_normal(sm)
 
     ax_hist.cla()
-    ax_hist.hist(mode_array, bins=[-0.5, 0.5, 1.5, 2.5, 3.5], rwidth=0.8, align='mid')
+    ax_hist.hist(
+        mode_array, bins=[-0.5, 0.5, 1.5, 2.5, 3.5],
+        rwidth=0.8, align='mid'
+    )
     ax_hist.set_xticks([0, 1, 2, 3])
     ax_hist.set_xticklabels(['mu00', 'mu01', 'mu10', 'mu11'])
     ax_hist.set_title('State Histogram')
@@ -157,19 +169,25 @@ def update(val):
     ax_mu11.set_ylabel('Normalized mu11')
 
     ax_mu10.cla()
-    ax_mu10.plot(timestep_array, norm_mu10_array, label='mu10', color='orange')
+    ax_mu10.plot(
+        timestep_array, norm_mu10_array, label='mu10', color='orange'
+    )
     ax_mu10.set_title('mu10 Normalized over Time')
     ax_mu10.set_xlabel('Time Steps')
     ax_mu10.set_ylabel('Normalized mu10')
 
     ax_mu01.cla()
-    ax_mu01.plot(timestep_array, norm_mu01_array, label='mu01', color='green')
+    ax_mu01.plot(
+        timestep_array, norm_mu01_array, label='mu01', color='green'
+    )
     ax_mu01.set_title('mu01 Normalized over Time')
     ax_mu01.set_xlabel('Time Steps')
     ax_mu01.set_ylabel('Normalized mu01')
 
     ax_mu00.cla()
-    ax_mu00.plot(timestep_array, norm_mu00_array, label='mu00', color='red')
+    ax_mu00.plot(
+        timestep_array, norm_mu00_array, label='mu00', color='red'
+    )
     ax_mu00.set_title('mu00 Normalized over Time')
     ax_mu00.set_xlabel('Time Steps')
     ax_mu00.set_ylabel('Normalized mu00')
@@ -321,21 +339,22 @@ def piecewise_linear_heaviside(x, delta=0.1):
         return (x + delta) / (2.0 * delta)
 
 cbar_phase = None  
+cmap = cm.viridis  
 
-fig1, (ax_phase, ax_hist) = plt.subplots(2, 1, figsize=(10, 8))
-fig2 = plt.figure(figsize=(10, 6))
-fig3, ((ax_mu11, ax_mu10), (ax_mu01, ax_mu00)) = plt.subplots(2, 2, figsize=(12, 10))
+fig1, (ax_phase, ax_hist) = plt.subplots(2, 1, figsize=(10, 8))  
+fig2 = plt.figure(figsize=(10, 6))  
+fig3, ((ax_mu11, ax_mu10), (ax_mu01, ax_mu00)) = plt.subplots(2, 2, figsize=(12, 10)) 
 fig4, (ax_z, ax_zdot) = plt.subplots(2, 1, figsize=(10, 8))
-fig2.subplots_adjust(left=0.25, right=0.95)
+fig2.subplots_adjust(left=0.25, right=0.95)  
 
 zdot_av_text = fig1.text(0.1, 0.9, '', transform=fig1.transFigure, fontsize=12)
 
 a_init = 1.0
-delta = 0.01  
-b1_init = a_init + 1.0  # greater than a_init
-b2_init = a_init + 1.0  # greater than a_init
-b3_init = (a_init + 1.0)  # must satisfy b1 + b2 + b3 > a
-b4_init = a_init + 1.0  # greater than a_init
+delta = 0.01  # Small delta to ensure strict inequality
+b1_init = a_init + 1.0  # Must be greater than a_init
+b2_init = a_init + 1.0  # Must be greater than a_init
+b3_init = (a_init + 1.0)  # Must satisfy b1 + b2 + b3 > a
+b4_init = a_init + 1.0  # Must be greater than a_init
 b5_init = 1.0
 initial_x1 = 1.0
 initial_x2 = 1.0
@@ -351,22 +370,34 @@ norm_mu00_array, norm_mu01_array, norm_mu10_array, norm_mu11_array = run_simulat
     integration_method='Euler', heaviside_method='Standard'
 )
 
-N = len(x1)
-time_steps = np.arange(N)
+dx = x1[1:] - x1[:-1]
+dy = x2[1:] - x2[:-1]
+skip = 10  
 
-norm = plt.Normalize(vmin=0, vmax=N-1)
+arrow_indices = np.arange(0, len(x1) - 1, skip)
 
-scatter = ax_phase.scatter(x1, x2, c=time_steps, cmap='viridis', s=0.1, norm=norm)
+norm = plt.Normalize(0, len(x1) - 1)
+normalized_time = norm(arrow_indices)
+
+colors = cmap(normalized_time)
+
+quiver = ax_phase.quiver(
+    x1[:-1][arrow_indices], x2[:-1][arrow_indices],
+    dx[arrow_indices], dy[arrow_indices],
+    scale_units='xy', angles='xy', scale=1, width=0.002,
+    color=colors
+)
 
 ax_phase.set_xlabel('x1')
 ax_phase.set_ylabel('x2')
-ax_phase.set_title('Phase Space Trajectory (x1 vs x2)')
+ax_phase.set_title('Phase Space Trajectory with Direction')
 ax_phase.grid(True)
 
-cbar_phase = fig1.colorbar(scatter, ax=ax_phase)
-cbar_phase.set_label('Time Step')
+sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
+sm.set_array([])
+cbar_phase = fig1.colorbar(sm, ax=ax_phase, label='Time Step')
 
-n = len(norm_mu11_array)
+n = len(norm_mu11_array)  
 timestep_array = np.arange(1, n + 1)
 
 ax_mu11.plot(timestep_array, norm_mu11_array, label='mu11')
@@ -389,7 +420,10 @@ ax_mu00.set_title('mu00 Normalized over Time')
 ax_mu00.set_xlabel('Time Steps')
 ax_mu00.set_ylabel('Normalized mu00')
 
-ax_hist.hist(mode_array, bins=[-0.5, 0.5, 1.5, 2.5, 3.5], rwidth=0.8, align='mid')
+ax_hist.hist(
+    mode_array, bins=[-0.5, 0.5, 1.5, 2.5, 3.5],
+    rwidth=0.8, align='mid'
+)
 ax_hist.set_xticks([0, 1, 2, 3])
 ax_hist.set_xticklabels(['mu00', 'mu01', 'mu10', 'mu11'])
 ax_hist.set_title('State Histogram')
@@ -451,7 +485,7 @@ ax_integration = fig2.add_axes([0.05, 0.05, 0.15, 0.15], facecolor='lightgoldenr
 heaviside_methods = ('Standard', 'Smooth', 'Regularized', 'Polynomial', 'Piecewise Linear')
 radio_heaviside = RadioButtons(ax_heaviside, heaviside_methods)
 
-integration_methods = ('Euler',)  # only Euler implemented
+integration_methods = ('Euler',)  # Only Euler implemented
 radio_integration = RadioButtons(ax_integration, integration_methods)
 
 radio_heaviside.on_clicked(update)
