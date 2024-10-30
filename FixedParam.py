@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider, RadioButtons
 
-max_tau = 50  
+max_tau = 100  
 timesteps = 5000.0
 
 def update(val):
