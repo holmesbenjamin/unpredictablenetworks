@@ -151,8 +151,8 @@ def main():
     heaviside_method = 'Standard' 
     integration_method = 'Euler' 
 
-    initial_x1 = 4.0
-    initial_x2 = 4.0
+    initial_x1 = 2.5
+    initial_x2 = 2.5
     x1bar = 1.0
     x2bar = 1.0
 
@@ -204,7 +204,7 @@ def main():
         δ_values = np.array(δ_values)
 
         plt.figure(figsize=(10, 6))
-        plt.plot(δ_values, μ3_values, label='μ3 (H1*H2)', color='black')
+        plt.plot(δ_values, μ3_values, label='μ3', color='black')
         plt.title(f'Variant {variant}')
         plt.xlabel('δ (Trader 1 decision interval)')
         plt.ylabel('Values')
