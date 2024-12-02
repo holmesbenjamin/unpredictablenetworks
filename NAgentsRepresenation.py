@@ -7,7 +7,7 @@ def generate_subsets(s, max_order):
 
 N = 3  
 
-max_interaction_order = 2  
+max_interaction_order = 3
 
 t = sp.symbols('t')
 
@@ -64,6 +64,7 @@ C_higher_order_values = {
     # s: tuple of agent indices involved in the interaction (0-based index)
     (0, (1, 2)): 0.05,  # c_{x1_23}
     (1, (0, 2)): -0.02,  # c_{x2_13}
+    (2, (0, 1, 2)): 0.03  # c_{x3_12}
 }
 coeff_values = {}
 
