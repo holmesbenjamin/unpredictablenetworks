@@ -5,11 +5,11 @@ import multiprocessing as mp
 from functools import partial
 
 @njit
-def heaviside_vectorized(x, epsilon=1.0):
+def heaviside_vectorised(x, epsilon=1.0):
     return 0.5 * (1.0 + np.tanh(x / epsilon))
 
 @njit
-def ornstein_uhlenbeck_optimized(theta, mu, sigma, size, current):
+def ornstein_uhlenbeck_optimised(theta, mu, sigma, size, current):
     return current + theta * (mu - current) + sigma * size * np.random.normal()
 
 class Agent:
@@ -75,10 +75,10 @@ def run_simulation_4agents(
         for i in range(4):
             delayed_X[i] = X[i, idx_delays[i]]
 
-        H = heaviside_vectorized(delayed_X - xbar)
+        H = heaviside_vectorised(delayed_X - xbar)
 
         for i, agent in enumerate(agents):
-            phi[i] = ornstein_uhlenbeck_optimized(
+            phi[i] = ornstein_uhlenbeck_optimised(
                 theta=lambda_params[i],
                 mu=0.0,
                 sigma=sigma_params[i],
@@ -104,7 +104,7 @@ def run_simulation_4agents(
             X[agent_idx, n + 1] = X[agent_idx, n] + epsilon * x_dot
 
     x_final = X[:, max_delay:]
-    H_final = heaviside_vectorized(x_final - xbar[:, np.newaxis])
+    H_final = heaviside_vectorised(x_final - xbar[:, np.newaxis])
     H1_arr = H_final[0]
     H2_arr = H_final[1]
     H3_arr = H_final[2]
